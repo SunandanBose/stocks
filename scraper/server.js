@@ -6,11 +6,23 @@ app.get('/ping', function (req, res) {
     res.end( "Successfull!!!" );
 })
 
-app.post('/stockDetails', function (req, res) {
+app.post('/stockDetails', async function (req, res) {
     var stockId = req.query.stockId;
-    if (stockId){
-        scrapper.testHandler(stockId)
+    try{
+        if (stockId){
+            await scrapper.testHandler(stockId)
+        }
+        res.end()
+    } catch (error) {
+        res.status(error.status || 500);
+        res.json({
+            error: {
+                stockId : stockId,
+                message: error.message,
+            },
+        });
     }
+    
 })
 
 var server = app.listen(9000, function () {
