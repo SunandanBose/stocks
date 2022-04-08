@@ -2,12 +2,10 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const parser = require("./parseHTML.js")
 const saveLocal = require("./saveLocal")
-// const aws = require("./aws")
 
 var testHandler = (exports.handler = async function (event, context) {
   const ratios = await getStockDetails(event);
-  const objectName = "data/" + ratios.stockId;
-  await saveLocal.save(ratios);
+  await saveLocal.save(ratios, "data");
 });
 
 function getStockDetails(stockId) {
