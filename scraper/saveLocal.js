@@ -3,7 +3,7 @@ const os = require('os');
 
 var pathToSave = os.homedir()+"/stocks/"
 
-async function save(data, additionalDirectory = ''){
+async function save(data, additionalDirectory = '', fileName){
 
     if(additionalDirectory !== '')
         pathToSave = pathToSave + additionalDirectory+'/'
@@ -12,7 +12,7 @@ async function save(data, additionalDirectory = ''){
         fs.mkdirSync(pathToSave)
     }
     
-    fs.writeFile(pathToSave+data.stockId, JSON.stringify(data), error => {
+    fs.writeFile(pathToSave+fileName, JSON.stringify(data), error => {
         if (error) {
         console.error(error)
         return

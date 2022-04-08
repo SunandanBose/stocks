@@ -5,7 +5,7 @@ const saveLocal = require("./saveLocal")
 
 var testHandler = (exports.handler = async function (event, context) {
   const ratios = await getStockDetails(event);
-  await saveLocal.save(ratios, "data");
+  await saveLocal.save(ratios, "data", ratios.stockId);
 });
 
 function getStockDetails(stockId) {

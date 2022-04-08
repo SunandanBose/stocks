@@ -15,7 +15,7 @@ function getCompanyNames() {
 async function fetchNifty50Companies(){
   let companies = await getCompanyNames();
   result = {name : "NIFTY50", company : companies}
-  await saveLocal.save(result,"category")
+  await saveLocal.save(result,"category", result.name)
 }
 
-// fetchNifty50Companies();
+module.exports = {fetchNifty50Companies};
