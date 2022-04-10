@@ -9,6 +9,7 @@ app.get('/ping', function (req, res) {
 
 app.post('/stockDetails', async function (req, res) {
     var stockId = req.query.stockId;
+    console.log(stockId)
     try{
         if (stockId){
             await scrapper.testHandler(stockId)

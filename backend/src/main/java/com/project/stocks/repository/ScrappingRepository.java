@@ -17,9 +17,9 @@ public class ScrappingRepository {
     private String scrapperServiceURL;
 
     public void add(String stockId)  {
-        scrapperServiceURL = scrapperServiceURL + "/stockDetails?stockId="+stockId;
+        String requestURL = scrapperServiceURL + "/stockDetails?stockId="+stockId;
         try {
-            URL url = new URL(scrapperServiceURL);
+            URL url = new URL(requestURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
