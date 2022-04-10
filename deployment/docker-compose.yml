@@ -1,0 +1,17 @@
+version: '3'
+services:
+  scraper:
+    image: scraper
+    ports:
+        - 9000:9000
+    volumes:
+        - stocks-vol:/root/
+  stocks-backend:
+    image: stocks-backend
+    ports:
+        - 8081:8081
+    volumes:
+        - stocks-vol:/root/
+volumes:
+  stocks-vol: 
+      driver: local
