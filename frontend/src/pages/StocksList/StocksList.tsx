@@ -5,11 +5,13 @@ import { seed } from '../../services/StockService';
 
 import {Grid, MenuItem, Select, TextField, Paper, Button} from '@mui/material';
 import './StocksList.css';
+import {StocksDetail} from "./StocksDetail";
 
 export const StocksList: React.FC = () => {
     let [sectors, setSectors] = useState([]);
-    let [stockScores, setStockScores] = useState([]);
-    let [currentStocks, setCurrentStocks] = useState([]);
+    let [searchStockId, setSearchStockId] = useState([]);
+    let [stockScores, setStockScores] =  useState<any[]>([]);
+    let [currentStocks, setCurrentStocks] = useState<any[]>([]);
     let [currentBreakdown, setCurrentBreakdown] = useState<any>({});
     let [selectedStock, setSelectedStock] = useState('');
     let [isBreakdownVisible, toggleBreakdownVisible] = useState(false);
@@ -25,7 +27,9 @@ export const StocksList: React.FC = () => {
             ]
         ).then(response => {
             let [sectors, stockScores, stocksBySector] = response;
-            setSectors(sectors.data);
+            const sectorsData = sectors.data;
+            sectorsData.push('ALL')
+            setSectors(sectorsData);
             setStockScores(stockScores.data);
             setCurrentStocks(filterStocksBasedOnCurrentSector(stockScores.data, stocksBySector.data.company));
         });
@@ -35,6 +39,8 @@ export const StocksList: React.FC = () => {
         getStocksBySector(currentSector)
             .then(response => {
                 let companies = response.data.company;
+                if (!response.data)
+                    companies = stockScores.map((stock: any) => stock.stockId);
                 setCurrentStocks(filterStocksBasedOnCurrentSector(stockScores, companies));
             })
     }, [currentSector]);
@@ -44,6 +50,7 @@ export const StocksList: React.FC = () => {
     }
 
     const handleSectorChange = (event: any) => {
+        setSearchStockId([]);
         setCurrentSector(event.target.value);
     }
 
@@ -55,7 +62,18 @@ export const StocksList: React.FC = () => {
 
     const handleSeedButton = () => {
         seed();
-        console.log('seed button clicked')
+    }
+
+    function handleSearch(event:any) {
+        let textToSearch = event.target.value;
+        setSearchStockId(textToSearch);
+        let stocksToSearch = textToSearch.split(',');
+        const result: any[] = []
+        stocksToSearch.forEach((stockToSearch: any) => {
+            result.push(...stockScores.filter((stock: any) => (stock.stockId.includes(stockToSearch.trim().toUpperCase()))));
+        });
+        console.log(result);
+        setCurrentStocks(result.sort((a: any, b: any) => b.score - a.score));
     }
 
     return (
@@ -85,7 +103,11 @@ export const StocksList: React.FC = () => {
                         <div className='menu-item'>
                             <Button variant="contained" onClick={handleSeedButton}>Seed</Button>
                         </div>
-                        <div className='menu-item'><TextField label="Search Stock" variant="outlined" disabled /></div>
+                        <div className='menu-item'>
+                            <TextField style={{ backgroundColor: 'whiteSmoke' }} label="Search Stock" variant="outlined"
+                                                              onChange={handleSearch}
+                                                              value={searchStockId}
+                        /></div>
                     </div>
                 </div>
             </Grid>
@@ -97,8 +119,8 @@ export const StocksList: React.FC = () => {
                         : currentStocks.map((currentStock: any) => {
                             let { stockId, scoreBreakdown, score } = currentStock;
                             return (
-                                <Paper key={stockId} className='stock-item'>
-                                    <div onClick={() => handleBreakdownToggle(scoreBreakdown, stockId)}>
+                                <Paper onClick={() => handleBreakdownToggle(scoreBreakdown, stockId)} key={stockId} className='stock-item'>
+                                    <div>
                                         <p className='stock-caption'>{stockId}</p>
                                         <p>{score}</p>
                                     </div>
@@ -107,21 +129,12 @@ export const StocksList: React.FC = () => {
                         })
                     }
                 </div>
-
-                {isBreakdownVisible && <Paper className='stock-breakdown'>
-                    <div>
-                        <p>Screener Link : <a href={`https://www.screener.in/company/${selectedStock}/consolidated/`} target="_blank">{selectedStock}</a></p>
-                        <p>Breakdown for : {selectedStock}</p>
-                        <p>PE Ratio: {currentBreakdown.pe}</p>
-                        <p>Operating Profit Margin: {currentBreakdown.operatingProfitMargin}</p>
-                        <p>Net Profit Margin: {currentBreakdown.netProfitMargin}</p>
-                        <p>Borrowings: {currentBreakdown.borrowings}</p>
-                        <p>Liabilities: {currentBreakdown.liabilities}</p>
-                        <p>Revenue: {currentBreakdown.revenue}</p>
-
-                        <button onClick={() => toggleBreakdownVisible(false)}>Close</button>
-                    </div>
-                </Paper>}
+                <StocksDetail
+                    stockId={selectedStock}
+                    isBreakdownVisible={isBreakdownVisible}
+                    toggleBreakdownVisible={toggleBreakdownVisible}
+                    currentBreakdown={currentBreakdown}
+                />
             </Grid>
         </Grid >
 

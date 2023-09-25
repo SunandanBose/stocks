@@ -7,29 +7,33 @@ const peerInfo = require("./peerInfo");
 const peInfo = require("./peInfo");
 const {seedCompanies} = require("./category/companiesService");
 
-
+app.use(express.json());
 app.use(cors());
+
 app.get('/ping', function (req, res) {
     res.end("ok");
 })
 
 app.post('/stockDetails', async function (req, res) {
     const stockId = req.query.stockId;
-    console.log("Fetching stock details for: " + stockId)
-    try {
-        if (stockId) {
+    let stocks = new Set()
+    stockId && stocks.add(stockId)
+    const requestBody = req.body || []
+    requestBody.forEach(item => stocks.add(item))
+    const failedStocks = []
+    for (const stockId of stocks) {
+        try {
             await scraper.stockDetailsHandler(stockId)
-        }
-        res.end()
-    } catch (error) {
-        res.status(error.status || 500);
-        res.json({
-            error: {
+        } catch (error) {
+            failedStocks.push({
                 stockId: stockId,
                 message: error.message,
-            },
-        });
+            })
+        }
     }
+
+    res.status(200);
+    res.json(failedStocks);
 })
 
 
